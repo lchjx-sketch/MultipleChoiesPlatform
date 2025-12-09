@@ -519,6 +519,19 @@
                         console.log("成功加載外部數據");
                         setAllowedUsers(usersData);
                         setQuestions(questionsData);
+                        
+                        // 從 user.json 中的 highestScore 生成排行榜
+                        const leaderboardData = usersData
+                            .filter(user => user.highestScore > 0)
+                            .map(user => ({
+                                userId: user.id,
+                                name: user.name,
+                                score: user.highestScore,
+                                percentage: Math.round((user.highestScore / questionsData.length) * 100)
+                            }))
+                            .sort((a, b) => b.score - a.score);
+                        setLeaderboard(leaderboardData);
+                        
                         setIsLoading(false);
                     } catch (err) {
                         console.warn("無法加載外部 JSON 文件，使用默認數據:", err.message);
@@ -535,11 +548,6 @@
                 const savedHistory = localStorage.getItem('quiz_history');
                 if (savedHistory) {
                     setQuizHistory(JSON.parse(savedHistory));
-                }
-
-                const savedLeaderboard = localStorage.getItem('quiz_leaderboard');
-                if (savedLeaderboard) {
-                    setLeaderboard(JSON.parse(savedLeaderboard));
                 }
             }, []);
 
@@ -626,35 +634,7 @@
             };
 
             const updateLeaderboard = (newResult) => {
-                let newLeaderboard = [...leaderboard];
-                const existingEntryIndex = newLeaderboard.findIndex(item => item.userId === newResult.userId);
-
-                if (existingEntryIndex !== -1) {
-                    if (newResult.score > newLeaderboard[existingEntryIndex].score) {
-                        newLeaderboard[existingEntryIndex] = {
-                            userId: newResult.userId,
-                            name: newResult.userName,
-                            score: newResult.score,
-                            date: newResult.date,
-                            percentage: newResult.percentage
-                        };
-                    } else if (newResult.score === newLeaderboard[existingEntryIndex].score) {
-                        newLeaderboard[existingEntryIndex].date = newResult.date;
-                    }
-                } else {
-                    newLeaderboard.push({
-                        userId: newResult.userId,
-                        name: newResult.userName,
-                        score: newResult.score,
-                        date: newResult.date,
-                        percentage: newResult.percentage
-                    });
-                }
-                newLeaderboard.sort((a, b) => b.score - a.score);
-                setLeaderboard(newLeaderboard);
-                localStorage.setItem('quiz_leaderboard', JSON.stringify(newLeaderboard));
-                
-                // 更新 user.json 中的最高成績
+                // 只更新 user.json 中的最高成績
                 updateUserHighestScore(newResult.userId, newResult.score);
             };
 
@@ -662,14 +642,27 @@
                 const updatedUsers = allowedUsers.map(user => {
                     if (user.id === userId) {
                         const currentHighest = user.highestScore || 0;
+                        const newHighest = Math.max(currentHighest, newScore);
                         return {
                             ...user,
-                            highestScore: Math.max(currentHighest, newScore)
+                            highestScore: newHighest
                         };
                     }
                     return user;
                 });
                 setAllowedUsers(updatedUsers);
+                
+                // 生成排行榜 (根據 user.json 中的 highestScore)
+                const newLeaderboard = updatedUsers
+                    .filter(user => user.highestScore > 0) // 只顯示有成績的用戶
+                    .map(user => ({
+                        userId: user.id,
+                        name: user.name,
+                        score: user.highestScore,
+                        percentage: Math.round((user.highestScore / questions.length) * 100)
+                    }))
+                    .sort((a, b) => b.score - a.score);
+                setLeaderboard(newLeaderboard);
                 
                 // 發送更新到後端伺服器
                 fetch('http://localhost:3000/api/users', {
@@ -684,9 +677,7 @@
                     console.log("用戶數據已保存到 user.json:", data.message);
                 })
                 .catch(err => {
-                    console.warn("無法保存到伺服器，數據已存儲在內存中", err);
-                    // 也保存到 localStorage 作為備份
-                    localStorage.setItem('users_highest_scores', JSON.stringify(updatedUsers));
+                    console.warn("無法保存到伺服器", err);
                 });
             };
 
