@@ -536,6 +536,9 @@
                             .sort((a, b) => b.score - a.score);
                         setLeaderboard(leaderboardData);
                         
+                        // 保存初始排行榜到 localStorage
+                        localStorage.setItem('quiz_leaderboard', JSON.stringify(leaderboardData));
+                        
                         setIsLoading(false);
                     } catch (err) {
                         console.warn("無法加載外部 JSON 文件，使用默認數據:", err.message);
@@ -668,7 +671,10 @@
                     .sort((a, b) => b.score - a.score);
                 setLeaderboard(newLeaderboard);
                 
-                // 發送更新到後端伺服器（支持本地和 Netlify 部署）
+                // 保存到 localStorage（備份）
+                localStorage.setItem('quiz_leaderboard', JSON.stringify(newLeaderboard));
+                
+                // 發送更新到後端（Netlify Functions 會通過 GitHub API 更新）
                 const apiUrl = window.location.hostname === 'localhost' 
                     ? 'http://localhost:3000/api/users'
                     : '/.netlify/functions/update-users';
@@ -682,10 +688,10 @@
                 })
                 .then(res => res.json())
                 .then(data => {
-                    console.log("用戶數據已保存:", data.message);
+                    console.log("排行榜已同步:", data.message);
                 })
                 .catch(err => {
-                    console.warn("無法保存到伺服器", err);
+                    console.warn("無法同步到伺服器，將使用 localStorage 備份", err);
                 });
             };
 

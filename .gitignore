@@ -1,0 +1,9 @@
+node_modules/
+.env
+.DS_Store
+*.log
+.netlify
+dist/
+build/
+.cache/
+firebase-config.js
