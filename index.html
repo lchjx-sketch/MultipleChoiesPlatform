@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智選 Quiz Platform</title>
+    
+    <!-- React & ReactDOM (使用 CDN) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (用於解析 JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS (樣式庫) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 自定義樣式與字型 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .animate-bounce-short {
+            animation: bounce 1s infinite;
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 圖標組件 (SVG Icons) ---
+        const IconBase = ({ children, size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+
+        const Play = (props) => <IconBase {...props}><polygon points="5 3 19 12 5 21 5 3"></polygon></IconBase>;
+        const CheckCircle = (props) => <IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></IconBase>;
+        const XCircle = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></IconBase>;
+        const Download = (props) => <IconBase {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></IconBase>;
+        const RotateCcw = (props) => <IconBase {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"></path><path d="M3 3v9h9"></path></IconBase>;
+        const FileJson = (props) => <IconBase {...props}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 13a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"></path><path d="M14 13a1 1 0 0 1 1 1v1a1 1 0 0 0 1 1 1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1"></path></IconBase>;
+        const Clock = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></IconBase>;
+        const Trophy = (props) => <IconBase {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17"></path><path d="M14 14.66V17"></path><path d="M12 2v7c0 1.1.9 2 2 2h3.5"></path></IconBase>;
+        const ChevronRight = (props) => <IconBase {...props}><polyline points="9 18 15 12 9 6"></polyline></IconBase>;
+        const BarChart3 = (props) => <IconBase {...props}><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></IconBase>;
+        const User = (props) => <IconBase {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></IconBase>;
+        const LogOut = (props) => <IconBase {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></IconBase>;
+        const AlertTriangle = (props) => <IconBase {...props}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></IconBase>;
+        const Loader2 = (props) => <IconBase {...props} className={`animate-spin ${props.className || ''}`}><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></IconBase>;
+
+        // --- 子組件定義 ---
+
+        const LoadingScreen = () => (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-indigo-600">
+                <Loader2 size={48} />
+                <p className="mt-4 font-medium text-gray-500">正在讀取題庫與用戶資料...</p>
+            </div>
+        );
+
+        const ErrorScreen = ({ error, onRetry }) => (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+                <div className="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center border border-red-100">
+                    <div className="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                        <AlertTriangle size={32} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">數據加載失敗</h2>
+                    <p className="text-red-500 font-medium mb-4">{error}</p>
+                    
+                    <button 
+                        onClick={onRetry}
+                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        重試加載
+                    </button>
+                </div>
+            </div>
+        );
+
+        const LeaderboardTable = ({ leaderboard, currentUser }) => (
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden w-full max-w-md mt-6">
+                <div className="bg-yellow-50 p-4 border-b border-yellow-100 flex items-center justify-between">
+                    <h3 className="font-bold text-yellow-800 flex items-center gap-2">
+                        <Trophy className="text-yellow-600" size={20} />
+                        榮譽排行榜 (最高成績)
+                    </h3>
+                    <span className="text-xs text-yellow-600 font-medium">Top Players</span>
+                </div>
+                <div className="divide-y divide-gray-100">
+                    {leaderboard.length === 0 ? (
+                        <div className="p-4 text-center text-gray-400 text-sm">暫無排名數據</div>
+                    ) : (
+                        leaderboard.map((entry, index) => (
+                            <div key={entry.userId} className="p-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                                        ${index === 0 ? 'bg-yellow-400 text-white' : 
+                                            index === 1 ? 'bg-gray-300 text-white' :
+                                            index === 2 ? 'bg-orange-300 text-white' : 'bg-gray-100 text-gray-500'}
+                                    `}>
+                                        {index + 1}
+                                    </div>
+                                    <div className="font-medium text-gray-700">
+                                        {entry.name}
+                                        {currentUser && currentUser.id === entry.userId && 
+                                            <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded">Me</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="font-bold text-indigo-600">{entry.score} 分</div>
+                                    <div className="text-xs text-gray-400">{entry.percentage || 0}%</div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        );
+
+        const WelcomeScreen = ({ currentUser, username, setUsername, handleLogin, loginError, startQuiz, setView, leaderboard }) => (
+            <div className="flex flex-col items-center justify-center animate-fade-in text-center p-6 w-full">
+                <div className="bg-indigo-100 p-6 rounded-full mb-6">
+                    <FileJson size={64} className="text-indigo-600" />
+                </div>
+                <div className="space-y-2 mb-8">
+                    <h1 className="text-4xl font-bold text-gray-800">智選 Quiz Platform</h1>
+                    <p className="text-gray-500 text-lg">準備好挑戰你的知識了嗎？</p>
+                </div>
+
+                <div className="w-full max-w-md space-y-4 mb-8">
+                    {!currentUser ? (
+                        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-700 mb-4 text-left flex items-center gap-2">
+                                <User size={20} />
+                                考生登入
+                            </h3>
+                            <div className="flex flex-col gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="請輸入您的名字 (例如: Guest)"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <button
+                                    onClick={handleLogin}
+                                    className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-lg font-semibold transition-all"
+                                >
+                                    確認身份
+                                </button>
+                                {loginError && <p className="text-red-500 text-sm text-left">{loginError}</p>}
+                                <div className="text-xs text-gray-400 text-left mt-2">
+                                    提示: 請輸入 users.json 中存在的名字
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4 animate-fade-in">
+                            <div className="bg-green-50 text-green-700 p-3 rounded-lg flex items-center justify-center gap-2">
+                                <CheckCircle size={18} />
+                                <span>歡迎回來，<span className="font-bold">{currentUser.name}</span></span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button 
+                                    onClick={startQuiz}
+                                    className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-8 rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                >
+                                    <Play size={24} />
+                                    開始測驗
+                                </button>
+                                <button 
+                                    onClick={() => setView('history')}
+                                    className="flex items-center justify-center gap-2 bg-white border-2 border-indigo-100 hover:border-indigo-300 text-indigo-600 py-4 px-8 rounded-xl font-semibold text-lg transition-all"
+                                >
+                                    <Clock size={24} />
+                                    歷史記錄
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <LeaderboardTable leaderboard={leaderboard} currentUser={currentUser} />
+
+                <div className="mt-8 p-4 bg-gray-50 rounded-lg text-sm text-gray-400 max-w-md">
+                    <p>系統會自動記錄您的歷史最高分並顯示在排行榜上。</p>
+                </div>
+            </div>
+        );
+
+        const QuizScreen = ({ questions, currentQuestionIndex, userAnswers, handleOptionSelect, handleNext }) => {
+            const currentQuestion = questions[currentQuestionIndex];
+            const isLastQuestion = currentQuestionIndex === questions.length - 1;
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            const hasAnswered = !!userAnswers[currentQuestion.id];
+
+            return (
+                <div className="w-full max-w-2xl mx-auto p-4 animate-fade-in">
+                    <div className="mb-8">
+                        <div className="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>問題 {currentQuestionIndex + 1} / {questions.length}</span>
+                            <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-indigo-500 transition-all duration-500 ease-out"
+                                style={{ width: `${progress}%` }}
+                            ></div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                        <div className="bg-indigo-50 p-6 border-b border-indigo-100">
+                            <span className="inline-block px-3 py-1 bg-indigo-200 text-indigo-700 rounded-full text-xs font-bold mb-3">
+                                {currentQuestion.category}
+                            </span>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-relaxed">
+                                {currentQuestion.question}
+                            </h2>
+                        </div>
+
+                        <div className="p-6 space-y-3">
+                            {currentQuestion.options.map((option) => {
+                                const isSelected = userAnswers[currentQuestion.id] === option.id;
+                                return (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => handleOptionSelect(option.id)}
+                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between group
+                                            ${isSelected 
+                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md' 
+                                            : 'border-gray-100 hover:border-indigo-200 hover:bg-gray-50 text-gray-600'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-colors
+                                                ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-indigo-100'}`}>
+                                                {option.id}
+                                            </span>
+                                            <span className="font-medium">{option.text}</span>
+                                        </div>
+                                        {isSelected && <CheckCircle size={20} className="text-indigo-500" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        
+                        <div className="p-6 bg-gray-50 flex justify-end border-t border-gray-100">
+                            <button
+                                onClick={handleNext}
+                                disabled={!hasAnswered}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all
+                                    ${hasAnswered 
+                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg transform hover:-translate-y-1' 
+                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                            >
+                                {isLastQuestion ? '查看結果' : '下一題'}
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ResultsScreen = ({ currentResult, currentUser, leaderboard, downloadResultJson, setView }) => {
+            if (!currentResult) return null;
+            const isPassing = currentResult.percentage >= 60;
+            
+            const userBest = leaderboard.find(u => u.userId === currentUser.id);
+            const isNewRecord = userBest && userBest.score === currentResult.score && userBest.date === currentResult.date;
+
+            return (
+                <div className="w-full max-w-3xl mx-auto p-4 animate-fade-in pb-20">
+                    <div className="text-center mb-8">
+                        <div className={`inline-flex p-4 rounded-full mb-4 ${isPassing ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
+                            {isPassing ? <Trophy size={48} /> : <BarChart3 size={48} />}
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-800">
+                            {isPassing ? '恭喜完成！' : '再接再厲！'}
+                        </h2>
+                        <p className="text-gray-500 mt-2">
+                            考生：<span className="font-bold text-gray-800">{currentUser.name}</span>
+                        </p>
+                        {isNewRecord && (
+                            <div className="mt-3 inline-block bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm font-bold animate-bounce-short">
+                                🎉 刷新個人紀錄！
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-gray-400 text-sm mb-1">得分</div>
+                            <div className={`text-4xl font-bold ${isPassing ? 'text-green-500' : 'text-orange-500'}`}>
+                                {currentResult.score} / {currentResult.totalQuestions}
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-gray-400 text-sm mb-1">正確率</div>
+                            <div className="text-4xl font-bold text-indigo-600">
+                                {currentResult.percentage}%
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center">
+                            <button
+                                onClick={downloadResultJson}
+                                className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-xl font-medium transition-all"
+                            >
+                                <Download size={18} />
+                                下載成績 (JSON)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+                        <div className="p-4 bg-gray-50 border-b border-gray-100 font-bold text-gray-700">
+                            答題詳情
+                        </div>
+                        <div className="divide-y divide-gray-100">
+                            {currentResult.details.map((item, index) => (
+                                <div key={index} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-start gap-3">
+                                        <div className={`mt-1 flex-shrink-0 ${item.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+                                            {item.isCorrect ? <CheckCircle size={24} /> : <XCircle size={24} />}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-medium text-gray-800 mb-2">
+                                                <span className="text-gray-400 mr-2">{index + 1}.</span>
+                                                {item.question}
+                                            </p>
+                                            <div className="text-sm space-y-1">
+                                                <div className={`flex items-center gap-2 ${item.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                                                    <span className="font-bold border border-current px-1.5 rounded text-xs">你的答案</span>
+                                                    {item.userAnswer ? `選項 ${item.userAnswer}` : '未作答'}
+                                                </div>
+                                                {!item.isCorrect && (
+                                                    <div className="flex items-center gap-2 text-green-600">
+                                                        <span className="font-bold border border-current px-1.5 rounded text-xs">正確答案</span>
+                                                        選項 {item.correctAnswer}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <button
+                            onClick={() => setView('welcome')}
+                            className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 font-medium px-6 py-3 rounded-lg hover:bg-indigo-50 transition-all"
+                        >
+                            <RotateCcw size={20} />
+                            返回主選單
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const HistoryScreen = ({ currentUser, quizHistory, setView }) => (
+            <div className="w-full max-w-3xl mx-auto p-4 animate-fade-in pb-20">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <Clock className="text-indigo-500" />
+                        答題歷史 ({currentUser.name})
+                    </h2>
+                    <button
+                        onClick={() => setView('welcome')}
+                        className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg transition-colors"
+                    >
+                        返回
+                    </button>
+                </div>
+                
+                {quizHistory.filter(h => h.userId === currentUser.id).length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                        <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FileJson className="text-gray-300" size={32} />
+                        </div>
+                        <p className="text-gray-500">您暫無歷史記錄</p>
+                        <button 
+                            onClick={() => setView('welcome')} 
+                            className="mt-4 text-indigo-600 hover:underline font-medium"
+                        >
+                            立即開始測驗
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {quizHistory.filter(h => h.userId === currentUser.id).map((record) => (
+                            <div key={record.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <div className="text-xs text-gray-400 mb-1">{record.date}</div>
+                                    <div className="font-bold text-gray-800">得分: {record.score} / {record.totalQuestions}</div>
+                                </div>
+                                
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right">
+                                        <span className={`text-2xl font-bold ${record.percentage >= 60 ? 'text-green-500' : 'text-orange-500'}`}>
+                                            {record.percentage}%
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const jsonString = JSON.stringify(record, null, 2);
+                                            const blob = new Blob([jsonString], { type: "application/json" });
+                                            const url = URL.createObjectURL(blob);
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.download = `quiz_result_${currentUser.name}_${record.id}.json`;
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                            URL.revokeObjectURL(url);
+                                        }}
+                                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                        title="再次下載 JSON"
+                                    >
+                                        <Download size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+
+        // --- 主應用組件 ---
+        function App() {
+            // State
+            const [view, setView] = useState('welcome');
+            const [questions, setQuestions] = useState([]); // 初始為空
+            const [allowedUsers, setAllowedUsers] = useState([]); // 初始為空
+            const [isLoading, setIsLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [userAnswers, setUserAnswers] = useState({}); 
+            const [quizHistory, setQuizHistory] = useState([]);
+            const [currentResult, setCurrentResult] = useState(null);
+            
+            const [username, setUsername] = useState('');
+            const [currentUser, setCurrentUser] = useState(null);
+            const [leaderboard, setLeaderboard] = useState([]);
+            const [loginError, setLoginError] = useState('');
+
+            // 最小化的默認數據 (僅在無法加載 JSON 時使用)
+            const DEFAULT_USERS = [
+  { "id": "u1", "name": "Admin" }
+];
+
+            const DEFAULT_QUESTIONS = [
+  {
+    "id": 1,
+    "category": "測試",
+    "question": "無法加載 questions.json 文件。請確保該文件存在於同一目錄中。",
+    "options": [
+      { "id": "A", "text": "已解決" },
+      { "id": "B", "text": "稍後再試" },
+      { "id": "C", "text": "忽略" },
+      { "id": "D", "text": "返回" }
+    ],
+    "correctAnswer": "A"
+  }
+];
+
+            // 初始化：從外部 JSON 與 localStorage 讀取數據
+            useEffect(() => {
+                const loadData = async () => {
+                    try {
+                        setIsLoading(true);
+                        console.log("開始加載數據文件...");
+                        
+                        // 嘗試加載外部 JSON 文件
+                        const usersRes = await fetch('user.json', { cache: 'no-cache' });
+                        const questionsRes = await fetch('questions.json', { cache: 'no-cache' });
+
+                        if (!usersRes.ok || !questionsRes.ok) {
+                            throw new Error('無法加載 JSON 文件');
+                        }
+
+                        const usersData = await usersRes.json();
+                        const questionsData = await questionsRes.json();
+
+                        console.log("成功加載外部數據");
+                        setAllowedUsers(usersData);
+                        setQuestions(questionsData);
+                        setIsLoading(false);
+                    } catch (err) {
+                        console.warn("無法加載外部 JSON 文件，使用默認數據:", err.message);
+                        // 使用默認數據作為備份
+                        setAllowedUsers(DEFAULT_USERS);
+                        setQuestions(DEFAULT_QUESTIONS);
+                        setError('無法加載外部數據文件，請確保 user.json 和 questions.json 存在於同一目錄。');
+                        setIsLoading(false);
+                    }
+                };
+
+                loadData();
+
+                const savedHistory = localStorage.getItem('quiz_history');
+                if (savedHistory) {
+                    setQuizHistory(JSON.parse(savedHistory));
+                }
+
+                const savedLeaderboard = localStorage.getItem('quiz_leaderboard');
+                if (savedLeaderboard) {
+                    setLeaderboard(JSON.parse(savedLeaderboard));
+                }
+            }, []);
+
+            // Handlers
+            const handleLogin = () => {
+                if (!username.trim()) {
+                    setLoginError('請輸入名字');
+                    return;
+                }
+                const foundUser = allowedUsers.find(
+                    u => u.name.toLowerCase() === username.trim().toLowerCase()
+                );
+                if (foundUser) {
+                    setCurrentUser(foundUser);
+                    setLoginError('');
+                } else {
+                    setLoginError('找不到該用戶名，請確認您的名字是否在 users.json 中');
+                }
+            };
+
+            const handleLogout = () => {
+                if (window.confirm("確定要登出嗎？")) {
+                    setCurrentUser(null);
+                    setUsername('');
+                    setView('welcome');
+                }
+            };
+
+            const startQuiz = () => {
+                setUserAnswers({});
+                setCurrentQuestionIndex(0);
+                setCurrentResult(null);
+                setView('quiz');
+            };
+
+            const handleOptionSelect = (optionId) => {
+                setUserAnswers(prev => ({
+                    ...prev,
+                    [questions[currentQuestionIndex].id]: optionId
+                }));
+            };
+
+            const handleNext = () => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    setCurrentQuestionIndex(prev => prev + 1);
+                } else {
+                    finishQuiz();
+                }
+            };
+
+            const finishQuiz = () => {
+                let score = 0;
+                const detailedResults = questions.map(q => {
+                    const isCorrect = userAnswers[q.id] === q.correctAnswer;
+                    if (isCorrect) score++;
+                    return {
+                        questionId: q.id,
+                        question: q.question,
+                        userAnswer: userAnswers[q.id],
+                        correctAnswer: q.correctAnswer,
+                        isCorrect
+                    };
+                });
+
+                const resultData = {
+                    id: Date.now(),
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    date: new Date().toLocaleString('zh-TW'),
+                    score: score,
+                    totalQuestions: questions.length,
+                    percentage: Math.round((score / questions.length) * 100),
+                    details: detailedResults
+                };
+
+                const newHistory = [resultData, ...quizHistory];
+                setQuizHistory(newHistory);
+                localStorage.setItem('quiz_history', JSON.stringify(newHistory));
+                
+                updateLeaderboard(resultData);
+
+                setCurrentResult(resultData);
+                setView('results');
+            };
+
+            const updateLeaderboard = (newResult) => {
+                let newLeaderboard = [...leaderboard];
+                const existingEntryIndex = newLeaderboard.findIndex(item => item.userId === newResult.userId);
+
+                if (existingEntryIndex !== -1) {
+                    if (newResult.score > newLeaderboard[existingEntryIndex].score) {
+                        newLeaderboard[existingEntryIndex] = {
+                            userId: newResult.userId,
+                            name: newResult.userName,
+                            score: newResult.score,
+                            date: newResult.date,
+                            percentage: newResult.percentage
+                        };
+                    } else if (newResult.score === newLeaderboard[existingEntryIndex].score) {
+                        newLeaderboard[existingEntryIndex].date = newResult.date;
+                    }
+                } else {
+                    newLeaderboard.push({
+                        userId: newResult.userId,
+                        name: newResult.userName,
+                        score: newResult.score,
+                        date: newResult.date,
+                        percentage: newResult.percentage
+                    });
+                }
+                newLeaderboard.sort((a, b) => b.score - a.score);
+                setLeaderboard(newLeaderboard);
+                localStorage.setItem('quiz_leaderboard', JSON.stringify(newLeaderboard));
+                
+                // 更新 user.json 中的最高成績
+                updateUserHighestScore(newResult.userId, newResult.score);
+            };
+
+            const updateUserHighestScore = (userId, newScore) => {
+                const updatedUsers = allowedUsers.map(user => {
+                    if (user.id === userId) {
+                        const currentHighest = user.highestScore || 0;
+                        return {
+                            ...user,
+                            highestScore: Math.max(currentHighest, newScore)
+                        };
+                    }
+                    return user;
+                });
+                setAllowedUsers(updatedUsers);
+                
+                // 發送更新到伺服器或保存到文件
+                fetch('user.json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedUsers)
+                }).catch(err => {
+                    console.warn("無法保存到 user.json，數據仍存儲在內存中", err);
+                    // 也保存到 localStorage 作為備份
+                    localStorage.setItem('users_highest_scores', JSON.stringify(updatedUsers));
+                });
+            };
+
+            const downloadResultJson = () => {
+                if (!currentResult) return;
+                const jsonString = JSON.stringify(currentResult, null, 2);
+                const blob = new Blob([jsonString], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `quiz_result_${currentUser.name}_${currentResult.id}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const handleRetry = () => {
+                window.location.reload();
+            };
+
+            // --- Render ---
+
+            if (isLoading) {
+                return <LoadingScreen />;
+            }
+
+            if (error) {
+                return <ErrorScreen error={error} onRetry={handleRetry} />;
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+                    <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
+                        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div 
+                                className="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer"
+                                onClick={() => {
+                                    if (view === 'quiz') {
+                                        if(window.confirm("確定要退出測驗嗎？進度將不會保存。")) setView('welcome');
+                                    } else {
+                                        setView('welcome');
+                                    }
+                                }}
+                            >
+                                <div className="bg-indigo-600 text-white p-1 rounded">
+                                    <CheckCircle size={20} />
+                                </div>
+                                <span>智選 Quiz</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {currentUser && view !== 'quiz' && (
+                                    <div className="hidden md:flex items-center gap-2">
+                                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                                            <User size={14} />
+                                            {currentUser.name}
+                                        </div>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 px-3 py-1 rounded-full transition-all border border-transparent hover:border-red-100"
+                                            title="登出"
+                                        >
+                                            <LogOut size={14} />
+                                            <span>登出</span>
+                                        </button>
+                                    </div>
+                                )}
+                                {view === 'quiz' && (
+                                    <button 
+                                        onClick={() => {
+                                            if(window.confirm("確定要退出測驗嗎？進度將不會保存。")) setView('welcome');
+                                        }}
+                                        className="text-sm text-gray-500 hover:text-red-500"
+                                    >
+                                        退出測驗
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-5xl mx-auto py-8">
+                        {view === 'welcome' && (
+                            <WelcomeScreen 
+                                currentUser={currentUser}
+                                username={username}
+                                setUsername={setUsername}
+                                handleLogin={handleLogin}
+                                loginError={loginError}
+                                startQuiz={startQuiz}
+                                setView={setView}
+                                leaderboard={leaderboard}
+                            />
+                        )}
+                        {view === 'quiz' && (
+                            <QuizScreen 
+                                questions={questions}
+                                currentQuestionIndex={currentQuestionIndex}
+                                userAnswers={userAnswers}
+                                handleOptionSelect={handleOptionSelect}
+                                handleNext={handleNext}
+                            />
+                        )}
+                        {view === 'results' && (
+                            <ResultsScreen 
+                                currentResult={currentResult}
+                                currentUser={currentUser}
+                                leaderboard={leaderboard}
+                                downloadResultJson={downloadResultJson}
+                                setView={setView}
+                            />
+                        )}
+                        {view === 'history' && (
+                            <HistoryScreen 
+                                currentUser={currentUser}
+                                quizHistory={quizHistory}
+                                setView={setView}
+                            />
+                        )}
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

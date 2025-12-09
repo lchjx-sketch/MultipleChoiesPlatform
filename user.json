@@ -1,0 +1,8 @@
+[
+  { "id": "u1", "name": "Admin", "highestScore": 0 },
+  { "id": "u2", "name": "Alice", "highestScore": 0 },
+  { "id": "u3", "name": "Bob", "highestScore": 0 },
+  { "id": "u4", "name": "Charlie", "highestScore": 0 },
+  { "id": "u5", "name": "David", "highestScore": 0 },
+  { "id": "u6", "name": "Guest", "highestScore": 0 }
+]
