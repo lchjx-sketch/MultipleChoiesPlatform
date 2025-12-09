@@ -227,7 +227,35 @@
                 }
             };
 
-            // 開始測驗：隨機抽取 10 題
+            // 打亂單道題目的選項順序
+            const shuffleOptions = (question) => {
+                const optionsWithMapping = question.options.map(opt => ({
+                    ...opt,
+                    originalId: opt.id
+                }));
+                
+                // Fisher-Yates 洗牌
+                for (let i = optionsWithMapping.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [optionsWithMapping[i], optionsWithMapping[j]] = [optionsWithMapping[j], optionsWithMapping[i]];
+                }
+                
+                // 找出正確答案在新順序中的位置
+                const correctOptionOriginalId = question.correctAnswer;
+                const newCorrectAnswerIndex = optionsWithMapping.findIndex(opt => opt.originalId === correctOptionOriginalId);
+                const newCorrectAnswerId = optionsWithMapping[newCorrectAnswerIndex].id;
+                
+                return {
+                    ...question,
+                    options: optionsWithMapping.map(opt => ({
+                        id: opt.id,
+                        text: opt.text
+                    })),
+                    correctAnswer: newCorrectAnswerId
+                };
+            };
+
+            // 開始測驗：隨機抽取 10 題並打亂選項
             const startQuiz = () => {
                 console.log(`題庫中有 ${questions.length} 道題目`);
                 
@@ -242,7 +270,10 @@
                     const j = Math.floor(Math.random() * (i + 1));
                     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                 }
-                const selectedQuestions = shuffled.slice(0, 10);
+                let selectedQuestions = shuffled.slice(0, 10);
+                
+                // 打亂每道題目的選項順序
+                selectedQuestions = selectedQuestions.map(q => shuffleOptions(q));
                 
                 console.log(`隨機抽取了 ${selectedQuestions.length} 道題目`);
                 console.log('抽取的題目 ID:', selectedQuestions.map(q => q.id).join(', '));
