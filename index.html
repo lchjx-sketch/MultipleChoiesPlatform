@@ -229,14 +229,23 @@
 
             // 開始測驗：隨機抽取 10 題
             const startQuiz = () => {
+                console.log(`題庫中有 ${questions.length} 道題目`);
+                
                 if (questions.length < 10) {
-                    alert('題庫中的題目數量少於 10 題，無法開始測驗');
+                    alert(`題庫中只有 ${questions.length} 道題目，無法開始測驗`);
                     return;
                 }
 
-                // 隨機抽取 10 題
-                const shuffled = [...questions].sort(() => Math.random() - 0.5);
+                // 使用更好的隨機算法 (Fisher-Yates)
+                const shuffled = [...questions];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
                 const selectedQuestions = shuffled.slice(0, 10);
+                
+                console.log(`隨機抽取了 ${selectedQuestions.length} 道題目`);
+                console.log('抽取的題目 ID:', selectedQuestions.map(q => q.id).join(', '));
                 
                 setQuizQuestions(selectedQuestions);
                 setUserAnswers({});
