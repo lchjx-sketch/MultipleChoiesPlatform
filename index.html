@@ -14,10 +14,11 @@
     
     <!-- Tailwind CSS (樣式庫) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Firebase SDK (可選，用於 Netlify 部署) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+
+    <!-- Supabase JS (UDM build) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <!-- Optional: Create a local `supabase-config.js` from `supabase-config-template.js` and fill your keys -->
+    <script src="supabase-config.js" defer></script>
     
     <!-- 自定義樣式與字型 -->
     <style>
@@ -509,36 +510,56 @@
                         setIsLoading(true);
                         console.log("開始加載數據文件...");
                         
-                        // 嘗試加載外部 JSON 文件
-                        const usersRes = await fetch('user.json', { cache: 'no-cache' });
+                        // 嘗試加載題庫
                         const questionsRes = await fetch('questions.json', { cache: 'no-cache' });
-
-                        if (!usersRes.ok || !questionsRes.ok) {
-                            throw new Error('無法加載 JSON 文件');
-                        }
-
-                        const usersData = await usersRes.json();
+                        if (!questionsRes.ok) throw new Error('無法加載 questions.json');
                         const questionsData = await questionsRes.json();
+
+                        // Supabase 優先（如果已配置）
+                        const useSupabase = typeof window !== 'undefined' && typeof window.SUPABASE_URL !== 'undefined' && typeof window.SUPABASE_ANON_KEY !== 'undefined' && window.SUPABASE_URL && window.SUPABASE_ANON_KEY;
+                        let usersData = [];
+                        if (useSupabase && typeof supabase !== 'undefined') {
+                            try {
+                                const sup = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+                                const { data, error } = await sup.from('users').select('*');
+                                if (error) throw error;
+                                usersData = data || [];
+                                console.log('從 Supabase 加載 users:', usersData.length);
+                            } catch (err) {
+                                console.warn('Supabase 加載用戶失敗，退回到 user.json：', err.message);
+                                const usersRes = await fetch('user.json', { cache: 'no-cache' });
+                                usersData = usersRes.ok ? await usersRes.json() : [];
+                            }
+                        } else {
+                            // 從靜態 user.json 加載
+                            const usersRes = await fetch('user.json', { cache: 'no-cache' });
+                            if (!usersRes.ok) throw new Error('無法加載 user.json');
+                            usersData = await usersRes.json();
+                        }
 
                         console.log("成功加載外部數據");
                         setAllowedUsers(usersData);
                         setQuestions(questionsData);
-                        
-                        // 從 user.json 中的 highestScore 生成排行榜
-                        const leaderboardData = usersData
-                            .filter(user => user.highestScore > 0)
-                            .map(user => ({
-                                userId: user.id,
-                                name: user.name,
-                                score: user.highestScore,
-                                percentage: Math.round((user.highestScore / questionsData.length) * 100)
-                            }))
-                            .sort((a, b) => b.score - a.score);
-                        setLeaderboard(leaderboardData);
-                        
-                        // 保存初始排行榜到 localStorage
-                        localStorage.setItem('quiz_leaderboard', JSON.stringify(leaderboardData));
-                        
+
+                        // localStorage 優先，否則從用戶數據初始化排行榜
+                        const savedLeaderboard = localStorage.getItem('quiz_leaderboard');
+                        if (savedLeaderboard) {
+                            setLeaderboard(JSON.parse(savedLeaderboard));
+                            console.log('使用 localStorage 中的排行榜數據');
+                        } else {
+                            const leaderboardData = usersData
+                                .filter(user => user.highestScore && user.highestScore > 0)
+                                .map(user => ({
+                                    userId: user.id,
+                                    name: user.name,
+                                    score: user.highestScore,
+                                    percentage: Math.round((user.highestScore / questionsData.length) * 100)
+                                }))
+                                .sort((a, b) => b.score - a.score);
+                            setLeaderboard(leaderboardData);
+                            localStorage.setItem('quiz_leaderboard', JSON.stringify(leaderboardData));
+                        }
+
                         setIsLoading(false);
                     } catch (err) {
                         console.warn("無法加載外部 JSON 文件，使用默認數據:", err.message);
@@ -645,7 +666,8 @@
                 updateUserHighestScore(newResult.userId, newResult.score);
             };
 
-            const updateUserHighestScore = (userId, newScore) => {
+            const updateUserHighestScore = async (userId, newScore) => {
+                // 更新本地 allowedUsers 並生成 leaderboard，然後嘗試同步到 Supabase（如果配置）
                 const updatedUsers = allowedUsers.map(user => {
                     if (user.id === userId) {
                         const currentHighest = user.highestScore || 0;
@@ -658,10 +680,9 @@
                     return user;
                 });
                 setAllowedUsers(updatedUsers);
-                
-                // 生成排行榜 (根據 user.json 中的 highestScore)
+
                 const newLeaderboard = updatedUsers
-                    .filter(user => user.highestScore > 0) // 只顯示有成績的用戶
+                    .filter(user => user.highestScore && user.highestScore > 0)
                     .map(user => ({
                         userId: user.id,
                         name: user.name,
@@ -669,30 +690,25 @@
                         percentage: Math.round((user.highestScore / questions.length) * 100)
                     }))
                     .sort((a, b) => b.score - a.score);
+
                 setLeaderboard(newLeaderboard);
-                
-                // 保存到 localStorage（備份）
                 localStorage.setItem('quiz_leaderboard', JSON.stringify(newLeaderboard));
-                
-                // 發送更新到後端（Netlify Functions 會通過 GitHub API 更新）
-                const apiUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000/api/users'
-                    : '/.netlify/functions/update-users';
-                
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedUsers)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    console.log("排行榜已同步:", data.message);
-                })
-                .catch(err => {
-                    console.warn("無法同步到伺服器，將使用 localStorage 備份", err);
-                });
+
+                // 如果 Supabase 可用，嘗試 upsert 當前用戶
+                const useSupabase = typeof window !== 'undefined' && typeof window.SUPABASE_URL !== 'undefined' && typeof window.SUPABASE_ANON_KEY !== 'undefined' && window.SUPABASE_URL && window.SUPABASE_ANON_KEY;
+                if (useSupabase && typeof supabase !== 'undefined') {
+                    try {
+                        const sup = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+                        const theUser = updatedUsers.find(u => u.id === userId);
+                        if (theUser) {
+                            const { error } = await sup.from('users').upsert({ id: theUser.id, name: theUser.name, highestScore: theUser.highestScore }, { returning: 'minimal' });
+                            if (error) throw error;
+                            console.log('已同步到 Supabase (upsert):', theUser.id);
+                        }
+                    } catch (err) {
+                        console.warn('同步到 Supabase 失敗，已保存在 localStorage:', err.message);
+                    }
+                }
             };
 
             const downloadResultJson = () => {
