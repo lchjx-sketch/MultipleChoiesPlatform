@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智選 Quiz Platform</title>
+    <title>Quiz Platform</title>
     
     <!-- 1. 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,82 +47,13 @@
         import { createRoot } from 'react-dom/client';
         import { Play, CheckCircle, XCircle, Download, RotateCcw, FileJson, Clock, Trophy, ChevronRight, BarChart3, User, Medal, LogOut, Loader2, Database, AlertTriangle } from 'lucide-react';
 
-        // =================================================================
-        // Supabase 配置
-        // =================================================================
         const SUPABASE_URL = window.SUPABASE_URL || 'https://llrbxpzcmdidlogplcur.supabase.co';
         const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_SqS1pjivl4Dow8mo5W4HRQ_xkUPsoRo';
-
-        /**
-        * 模擬從外部 questions.json 文件讀取的題庫數據
-        */
-        const DEFAULT_QUESTIONS = [
-            {
-                id: 1,
-                category: "前端技術",
-                question: "React 中的 Hook 是在哪個版本引入的？",
-                options: [
-                { id: "A", text: "16.0" },
-                { id: "B", text: "16.8" },
-                { id: "C", text: "17.0" },
-                { id: "D", text: "15.5" }
-                ],
-                correctAnswer: "B"
-            },
-            {
-                id: 2,
-                category: "網絡基礎",
-                question: "HTTP 協議中，狀態碼 404 代表什麼含義？",
-                options: [
-                { id: "A", text: "伺服器錯誤 (Internal Server Error)" },
-                { id: "B", text: "禁止訪問 (Forbidden)" },
-                { id: "C", text: "未找到資源 (Not Found)" },
-                { id: "D", text: "請求成功 (OK)" }
-                ],
-                correctAnswer: "C"
-            },
-            {
-                id: 3,
-                category: "程式語言",
-                question: "JavaScript 中，以下哪個關鍵字用於宣告常數？",
-                options: [
-                { id: "A", text: "var" },
-                { id: "B", text: "let" },
-                { id: "C", text: "const" },
-                { id: "D", text: "static" }
-                ],
-                correctAnswer: "C"
-            },
-            {
-                id: 4,
-                category: "CSS",
-                question: "在 Flexbox 佈局中，用於控制主軸對齊方式的屬性是？",
-                options: [
-                { id: "A", text: "align-items" },
-                { id: "B", text: "justify-content" },
-                { id: "C", text: "flex-direction" },
-                { id: "D", text: "align-content" }
-                ],
-                correctAnswer: "B"
-            },
-            {
-                id: 5,
-                category: "通用知識",
-                question: "JSON 的全稱是什麼？",
-                options: [
-                { id: "A", text: "JavaScript Object Notation" },
-                { id: "B", text: "Java Standard Output Network" },
-                { id: "C", "text": "JavaScript Online Notation" },
-                { id: "D", text: "Java Source Object Network" }
-                ],
-                correctAnswer: "A"
-            }
-        ];
 
         function App() {
             // 應用狀態管理
             const [view, setView] = useState('welcome');
-            const [questions, setQuestions] = useState(DEFAULT_QUESTIONS);
+            const [questions, setQuestions] = useState([]);
             const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
             const [userAnswers, setUserAnswers] = useState({}); 
             const [quizHistory, setQuizHistory] = useState([]);
@@ -143,6 +74,28 @@
             const [allowedUsers, setAllowedUsers] = useState([]);
             const [dbError, setDbError] = useState(null);
 
+            // 0. 加載 questions.json (從本地文件)
+            useEffect(() => {
+                const loadQuestions = async () => {
+                    try {
+                        const response = await fetch('./questions.json');
+                        if (!response.ok) {
+                            throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        if (!Array.isArray(data) || data.length === 0) {
+                            throw new Error('questions.json 格式不正確，應為非空數組');
+                        }
+                        setQuestions(data);
+                        console.log(`成功加載 ${data.length} 道題目`);
+                    } catch (err) {
+                        console.error("載入題庫失敗:", err);
+                        setDbError(`無法讀取題庫數據: ${err.message}`);
+                    }
+                };
+                loadQuestions();
+            }, []);
+
             // 1. 初始化 Supabase
             useEffect(() => {
                 // 優先使用 window.supabase (如果已由 CDN 加載)
@@ -153,7 +106,6 @@
                         setIsSupabaseReady(true);
                     } catch (err) {
                         setDbError("Supabase 初始化失敗: " + err.message);
-                        setIsLoading(false);
                     }
                 } else {
                     // 如果 window.supabase 不存在，動態注入 script (備用方案)
@@ -166,20 +118,18 @@
                             setIsSupabaseReady(true);
                         } catch (err) {
                             setDbError("Supabase 初始化失敗: " + err.message);
-                            setIsLoading(false);
                         }
                     };
                     script.onerror = () => {
                         setDbError("無法加載 Supabase SDK，請檢查網絡連接");
-                        setIsLoading(false);
                     };
                     document.body.appendChild(script);
                 }
             }, []);
 
-            // 2. 初始化數據：當 Supabase 就緒後，讀取數據
+            // 2. 初始化數據：當 Supabase 就緒且題庫已加載後，讀取數據
             useEffect(() => {
-                if (!isSupabaseReady || !supabaseClient) return;
+                if (!isSupabaseReady || !supabaseClient || questions.length === 0) return;
 
                 const initData = async () => {
                     try {
@@ -206,7 +156,7 @@
                 };
 
                 initData();
-            }, [isSupabaseReady, supabaseClient]);
+            }, [isSupabaseReady, supabaseClient, questions.length]);
 
             // 從 DB 讀取排行榜
             const fetchLeaderboard = async () => {
