@@ -15,6 +15,10 @@
     <!-- Tailwind CSS (樣式庫) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Firebase SDK (可選，用於 Netlify 部署) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    
     <!-- 自定義樣式與字型 -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -664,8 +668,12 @@
                     .sort((a, b) => b.score - a.score);
                 setLeaderboard(newLeaderboard);
                 
-                // 發送更新到後端伺服器
-                fetch('http://localhost:3000/api/users', {
+                // 發送更新到後端伺服器（支持本地和 Netlify 部署）
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/users'
+                    : '/.netlify/functions/update-users';
+                
+                fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -674,7 +682,7 @@
                 })
                 .then(res => res.json())
                 .then(data => {
-                    console.log("用戶數據已保存到 user.json:", data.message);
+                    console.log("用戶數據已保存:", data.message);
                 })
                 .catch(err => {
                     console.warn("無法保存到伺服器", err);
