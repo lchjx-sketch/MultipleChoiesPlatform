@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "category": "前端技術",
+    "category": "電腦知識1209",
     "question": "React 中的 Hook 是在哪個版本引入的？",
     "options": [
       { "id": "A", "text": "16.0" },
@@ -13,7 +13,7 @@
   },
   {
     "id": 2,
-    "category": "網絡基礎",
+    "category": "電腦知識1209",
     "question": "HTTP 協議中，狀態碼 404 代表什麼含義？",
     "options": [
       { "id": "A", "text": "伺服器錯誤 (Internal Server Error)" },
@@ -25,7 +25,7 @@
   },
   {
     "id": 3,
-    "category": "程式語言",
+    "category": "電腦知識1209",
     "question": "JavaScript 中，以下哪個關鍵字用於宣告常數？",
     "options": [
       { "id": "A", "text": "var" },
@@ -37,7 +37,7 @@
   },
   {
     "id": 4,
-    "category": "CSS",
+    "category": "電腦知識1209",
     "question": "在 Flexbox 佈局中，用於控制主軸對齊方式的屬性是？",
     "options": [
       { "id": "A", "text": "align-items" },
@@ -49,7 +49,7 @@
   },
   {
     "id": 5,
-    "category": "通用知識",
+    "category": "電腦知識1209",
     "question": "JSON 的全稱是什麼？",
     "options": [
       { "id": "A", "text": "JavaScript Object Notation" },
