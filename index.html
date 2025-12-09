@@ -54,6 +54,7 @@
             // 應用狀態管理
             const [view, setView] = useState('welcome');
             const [questions, setQuestions] = useState([]);
+            const [quizQuestions, setQuizQuestions] = useState([]); // 當前測驗的題目 (隨機抽取的10題)
             const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
             const [userAnswers, setUserAnswers] = useState({}); 
             const [quizHistory, setQuizHistory] = useState([]);
@@ -226,8 +227,18 @@
                 }
             };
 
-            // 開始測驗
+            // 開始測驗：隨機抽取 10 題
             const startQuiz = () => {
+                if (questions.length < 10) {
+                    alert('題庫中的題目數量少於 10 題，無法開始測驗');
+                    return;
+                }
+
+                // 隨機抽取 10 題
+                const shuffled = [...questions].sort(() => Math.random() - 0.5);
+                const selectedQuestions = shuffled.slice(0, 10);
+                
+                setQuizQuestions(selectedQuestions);
                 setUserAnswers({});
                 setCurrentQuestionIndex(0);
                 setCurrentResult(null);
@@ -237,12 +248,12 @@
             const handleOptionSelect = (optionId) => {
                 setUserAnswers(prev => ({
                     ...prev,
-                    [questions[currentQuestionIndex].id]: optionId
+                    [quizQuestions[currentQuestionIndex].id]: optionId
                 }));
             };
 
             const handleNext = () => {
-                if (currentQuestionIndex < questions.length - 1) {
+                if (currentQuestionIndex < quizQuestions.length - 1) {
                     setCurrentQuestionIndex(prev => prev + 1);
                 } else {
                     finishQuiz();
@@ -251,7 +262,7 @@
 
             const finishQuiz = async () => {
                 let score = 0;
-                const detailedResults = questions.map(q => {
+                const detailedResults = quizQuestions.map(q => {
                     const isCorrect = userAnswers[q.id] === q.correctAnswer;
                     if (isCorrect) score++;
                     return {
@@ -267,8 +278,8 @@
                     user_id: currentUser.id,
                     user_name: currentUser.name,
                     score: score,
-                    total_questions: questions.length,
-                    percentage: Math.round((score / questions.length) * 100),
+                    total_questions: quizQuestions.length,
+                    percentage: Math.round((score / quizQuestions.length) * 100),
                     details: detailedResults
                 };
 
@@ -421,16 +432,16 @@
             );
 
             const renderQuizScreen = () => {
-                const currentQuestion = questions[currentQuestionIndex];
-                const isLastQuestion = currentQuestionIndex === questions.length - 1;
-                const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+                const currentQuestion = quizQuestions[currentQuestionIndex];
+                const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
+                const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
                 const hasAnswered = !!userAnswers[currentQuestion.id];
 
                 return (
                     <div className="w-full max-w-2xl mx-auto p-4 animate-fade-in">
                         <div className="mb-8">
                             <div className="flex justify-between text-sm text-gray-500 mb-2">
-                                <span>問題 {currentQuestionIndex + 1} / {questions.length}</span>
+                                <span>問題 {currentQuestionIndex + 1} / {quizQuestions.length}</span>
                                 <span>{Math.round(progress)}%</span>
                             </div>
                             <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">

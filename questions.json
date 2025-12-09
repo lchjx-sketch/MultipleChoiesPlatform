@@ -58,5 +58,365 @@
       { "id": "D", "text": "Java Source Object Network" }
     ],
     "correctAnswer": "A"
+  },
+    {
+    "id": 6,
+    "category": "電腦知識1209",
+    "question": "在 SQL 語法中，用於從資料庫檢索資料的指令是？",
+    "options": [
+      { "id": "A", "text": "UPDATE" },
+      { "id": "B", "text": "SELECT" },
+      { "id": "C", "text": "INSERT" },
+      { "id": "D", "text": "DELETE" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 7,
+    "category": "電腦知識1209",
+    "question": "Git 版本控制系統中，用於將檔案更改添加到暫存區（Staging Area）的指令是？",
+    "options": [
+      { "id": "A", "text": "git commit" },
+      { "id": "B", "text": "git push" },
+      { "id": "C", "text": "git add" },
+      { "id": "D", "text": "git pull" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 8,
+    "category": "電腦知識1209",
+    "question": "以下哪種資料結構遵循「後進先出」（LIFO）原則？",
+    "options": [
+      { "id": "A", "text": "佇列 (Queue)" },
+      { "id": "B", "text": "堆疊 (Stack)" },
+      { "id": "C", "text": "連結串列 (Linked List)" },
+      { "id": "D", "text": "樹 (Tree)" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 9,
+    "category": "電腦知識1209",
+    "question": "在 OSI 模型中，IP 地址位於哪一層？",
+    "options": [
+      { "id": "A", "text": "應用層 (Application Layer)" },
+      { "id": "B", "text": "傳輸層 (Transport Layer)" },
+      { "id": "C", "text": "網路層 (Network Layer)" },
+      { "id": "D", "text": "資料連結層 (Data Link Layer)" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 10,
+    "category": "電腦知識1209",
+    "question": "Linux 系統中，用於列出當前目錄下檔案清單的指令是？",
+    "options": [
+      { "id": "A", "text": "ls" },
+      { "id": "B", "text": "cd" },
+      { "id": "C", "text": "mkdir" },
+      { "id": "D", "text": "pwd" }
+    ],
+    "correctAnswer": "A"
+  },
+  {
+    "id": 11,
+    "category": "電腦知識1209",
+    "question": "Python 語言中，以下哪種資料型態是不可變的（Immutable）？",
+    "options": [
+      { "id": "A", "text": "列表 (List)" },
+      { "id": "B", "text": "字典 (Dictionary)" },
+      { "id": "C", "text": "集合 (Set)" },
+      { "id": "D", "text": "元組 (Tuple)" }
+    ],
+    "correctAnswer": "D"
+  },
+  {
+    "id": 12,
+    "category": "電腦知識1209",
+    "question": "HTML5 中的 `<canvas>` 元素主要用於什麼用途？",
+    "options": [
+      { "id": "A", "text": "播放音訊" },
+      { "id": "B", "text": "繪製圖形和動畫" },
+      { "id": "C", "text": "建立資料表格" },
+      { "id": "D", "text": "嵌入外部網頁" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 13,
+    "category": "電腦知識1209",
+    "question": "HTTPS 協議中的 'S' 代表什麼？",
+    "options": [
+      { "id": "A", "text": "Speed (速度)" },
+      { "id": "B", "text": "Standard (標準)" },
+      { "id": "C", "text": "Secure (安全)" },
+      { "id": "D", "text": "System (系統)" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 14,
+    "category": "電腦知識1209",
+    "question": "二元搜尋演算法 (Binary Search) 的時間複雜度通常是多少？",
+    "options": [
+      { "id": "A", "text": "O(1)" },
+      { "id": "B", "text": "O(n)" },
+      { "id": "C", "text": "O(log n)" },
+      { "id": "D", "text": "O(n^2)" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 15,
+    "category": "電腦知識1209",
+    "question": "Docker 主要用於解決什麼問題？",
+    "options": [
+      { "id": "A", "text": "資料庫備份" },
+      { "id": "B", "text": "容器化應用程式部署" },
+      { "id": "C", "text": "前端網頁設計" },
+      { "id": "D", "text": "硬體驅動程式管理" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 16,
+    "category": "電腦知識1209",
+    "question": "CSS 中，id 選擇器的符號是什麼？",
+    "options": [
+      { "id": "A", "text": "." },
+      { "id": "B", "text": "#" },
+      { "id": "C", "text": "$" },
+      { "id": "D", "text": "@" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 17,
+    "category": "電腦知識1209",
+    "question": "在資料庫設計中，用於唯一標識表中每一行數據的欄位稱為？",
+    "options": [
+      { "id": "A", "text": "外鍵 (Foreign Key)" },
+      { "id": "B", "text": "索引 (Index)" },
+      { "id": "C", "text": "主鍵 (Primary Key)" },
+      { "id": "D", "text": "視圖 (View)" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 18,
+    "category": "電腦知識1209",
+    "question": "以下哪一個是 Python 中用於定義函數的關鍵字？",
+    "options": [
+      { "id": "A", "text": "func" },
+      { "id": "B", "text": "def" },
+      { "id": "C", "text": "function" },
+      { "id": "D", "text": "define" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 19,
+    "category": "電腦知識1209",
+    "question": "DNS 系統的主要功能是什麼？",
+    "options": [
+      { "id": "A", "text": "加密網路傳輸" },
+      { "id": "B", "text": "分配 IP 地址" },
+      { "id": "C", "text": "將域名解析為 IP 地址" },
+      { "id": "D", "text": "阻擋病毒攻擊" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 20,
+    "category": "電腦知識1209",
+    "question": "1 Byte (位元組) 等於多少 Bit (位元)？",
+    "options": [
+      { "id": "A", "text": "4" },
+      { "id": "B", "text": "8" },
+      { "id": "C", "text": "16" },
+      { "id": "D", "text": "32" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 21,
+    "category": "電腦知識1209",
+    "question": "React 中，useEffect Hook 的第二個參數傳入空陣列 [] 代表什麼？",
+    "options": [
+      { "id": "A", "text": "每次組件更新時執行" },
+      { "id": "B", "text": "只在組件卸載 (Unmount) 時執行" },
+      { "id": "C", "text": "只在組件掛載 (Mount) 時執行一次" },
+      { "id": "D", "text": "永遠不執行" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 22,
+    "category": "電腦知識1209",
+    "question": "以下哪種 HTTP 方法通常用於向伺服器提交數據以創建新資源？",
+    "options": [
+      { "id": "A", "text": "GET" },
+      { "id": "B", "text": "POST" },
+      { "id": "C", "text": "DELETE" },
+      { "id": "D", "text": "HEAD" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 23,
+    "category": "電腦知識1209",
+    "question": "SSD 硬碟相比傳統 HDD 硬碟的主要優勢是什麼？",
+    "options": [
+      { "id": "A", "text": "價格更便宜" },
+      { "id": "B", "text": "讀寫速度更快" },
+      { "id": "C", "text": "容量上限更高" },
+      { "id": "D", "text": "資料更容易恢復" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 24,
+    "category": "電腦知識1209",
+    "question": "在程式設計中，「死無窮迴圈」(Infinite Loop) 是指？",
+    "options": [
+      { "id": "A", "text": "程式執行速度太慢" },
+      { "id": "B", "text": "程式碼行數過多" },
+      { "id": "C", "text": "迴圈沒有終止條件，永遠執行下去" },
+      { "id": "D", "text": "變數名稱定義錯誤" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 25,
+    "category": "電腦知識1209",
+    "question": "下列哪個指令通常用於在 Node.js 專案中安裝依賴包？",
+    "options": [
+      { "id": "A", "text": "npm install" },
+      { "id": "B", "text": "node start" },
+      { "id": "C", "text": "git clone" },
+      { "id": "D", "text": "python setup" }
+    ],
+    "correctAnswer": "A"
+  },
+  {
+    "id": 26,
+    "category": "電腦知識1209",
+    "question": "IPv4 地址由多少個位元組成？",
+    "options": [
+      { "id": "A", "text": "32" },
+      { "id": "B", "text": "64" },
+      { "id": "C", "text": "128" },
+      { "id": "D", "text": "256" }
+    ],
+    "correctAnswer": "A"
+  },
+  {
+    "id": 27,
+    "category": "電腦知識1209",
+    "question": "在物件導向程式設計 (OOP) 中，繼承的主要目的是？",
+    "options": [
+      { "id": "A", "text": "隱藏數據" },
+      { "id": "B", "text": "程式碼重用 (Code Reusability)" },
+      { "id": "C", "text": "增加程式複雜度" },
+      { "id": "D", "text": "減少記憶體使用" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": 28,
+    "category": "電腦知識1209",
+    "question": "Linux 中，用於切換使用者的指令是？",
+    "options": [
+      { "id": "A", "text": "su" },
+      { "id": "B", "text": "chown" },
+      { "id": "C", "text": "chmod" },
+      { "id": "D", "text": "top" }
+    ],
+    "correctAnswer": "A"
+  },
+  {
+    "id": 29,
+    "category": "電腦知識1209",
+    "question": "下列哪種攻擊方式是利用 SQL 語法漏洞來操縱資料庫？",
+    "options": [
+      { "id": "A", "text": "DDoS" },
+      { "id": "B", "text": "Phishing (釣魚)" },
+      { "id": "C", "text": "SQL Injection (SQL 注入)" },
+      { "id": "D", "text": "XSS (跨站腳本攻擊)" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 30,
+    "category": "電腦知識1209",
+    "question": "API 的全稱是什麼？",
+    "options": [
+      { "id": "A", "text": "Application Programming Interface" },
+      { "id": "B", "text": "Advanced Protocol Internet" },
+      { "id": "C", "text": "Automated Program Interaction" },
+      { "id": "D", "text": "Application Process Integration" }
+    ],
+    "correctAnswer": "A"
+  },
+  {
+    "id": 31,
+    "category": "電腦知識1209",
+    "question": "下列哪個是非關聯式資料庫 (NoSQL) 的例子？",
+    "options": [
+      { "id": "A", "text": "MySQL" },
+      { "id": "B", "text": "PostgreSQL" },
+      { "id": "C", "text": "MongoDB" },
+      { "id": "D", "text": "Oracle" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 32,
+    "category": "電腦知識1209",
+    "question": "在 Git 中，什麼是指向特定提交 (Commit) 的可移動指針？",
+    "options": [
+      { "id": "A", "text": "Remote" },
+      { "id": "B", "text": "Repository" },
+      { "id": "C", "text": "Branch (分支)" },
+      { "id": "D", "text": "Blob" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 33,
+    "category": "電腦知識1209",
+    "question": "JavaScript 中，'===' 運算符的作用是？",
+    "options": [
+      { "id": "A", "text": "賦值" },
+      { "id": "B", "text": "比較值，不比較型別" },
+      { "id": "C", "text": "比較值和型別 (嚴格相等)" },
+      { "id": "D", "text": "邏輯非" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 34,
+    "category": "電腦知識1209",
+    "question": "RAM 的特性是？",
+    "options": [
+      { "id": "A", "text": "斷電後資料會保存" },
+      { "id": "B", "text": "只能讀取不能寫入" },
+      { "id": "C", "text": "斷電後資料會消失 (揮發性)" },
+      { "id": "D", "text": "通常用於長期儲存檔案" }
+    ],
+    "correctAnswer": "C"
+  },
+  {
+    "id": 35,
+    "category": "電腦知識1209",
+    "question": "網頁開發中，DOM 代表什麼？",
+    "options": [
+      { "id": "A", "text": "Document Object Model" },
+      { "id": "B", "text": "Data Oriented Method" },
+      { "id": "C", "text": "Digital Order Manager" },
+      { "id": "D", "text": "Desktop Operating Mode" }
+    ],
+    "correctAnswer": "A"
   }
 ]
